@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { DATA_EARLIEST_MONTH, DATA_LATEST_MONTH, RANGE_PRESET_LABEL, type RangePreset } from "@/lib/dateRange";
+import { DATA_EARLIEST_MONTH, DATA_LATEST_MONTH, type RangePreset } from "@/lib/dateRange";
+import { translations, type Lang } from "@/lib/i18n/translations";
 
 const PRESETS: RangePreset[] = ["this-month", "last-3-months", "ytd"];
 
@@ -9,6 +10,14 @@ export function DateRangeFilter({ currentPreset, from, to }: { currentPreset: Ra
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const lang: Lang = searchParams.get("lang") === "ar" ? "ar" : "en";
+  const t = translations[lang].filters;
+  const presetLabel: Record<RangePreset, string> = {
+    "this-month": t.thisMonth,
+    "last-3-months": t.last3Months,
+    ytd: t.yearToDate,
+    custom: t.custom,
+  };
 
   function setPreset(preset: RangePreset) {
     const params = new URLSearchParams(searchParams.toString());
@@ -44,7 +53,7 @@ export function DateRangeFilter({ currentPreset, from, to }: { currentPreset: Ra
             }`}
             aria-pressed={currentPreset === preset}
           >
-            {RANGE_PRESET_LABEL[preset]}
+            {presetLabel[preset]}
           </button>
         ))}
         <button
@@ -55,13 +64,13 @@ export function DateRangeFilter({ currentPreset, from, to }: { currentPreset: Ra
           }`}
           aria-pressed={currentPreset === "custom"}
         >
-          Custom
+          {t.custom}
         </button>
       </div>
       {currentPreset === "custom" && (
         <div className="flex items-center gap-2 text-sm">
           <label className="flex items-center gap-1 text-[var(--text-secondary)]">
-            From
+            {t.from}
             <input
               type="month"
               value={from ?? DATA_EARLIEST_MONTH}
@@ -72,7 +81,7 @@ export function DateRangeFilter({ currentPreset, from, to }: { currentPreset: Ra
             />
           </label>
           <label className="flex items-center gap-1 text-[var(--text-secondary)]">
-            To
+            {t.to}
             <input
               type="month"
               value={to ?? DATA_LATEST_MONTH}

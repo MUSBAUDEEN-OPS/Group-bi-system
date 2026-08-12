@@ -2,12 +2,15 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { resolveFormatter, type FormatKind } from "@/lib/formatKind";
+import type { Currency } from "@/lib/currency";
 
 export interface BarChartCardProps {
   title: string;
   data: Array<{ label: string; value: number }>;
   color?: string;
   format?: FormatKind;
+  currency?: Currency;
+  rate?: number;
   layout?: "horizontal" | "vertical";
 }
 
@@ -17,18 +20,20 @@ function BarTooltip({ active, payload, valueFormatter }: any) {
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm shadow-lg">
       <div className="text-[var(--text-muted)]">{point.label}</div>
-      <div className="font-semibold text-[var(--foreground)]">{valueFormatter(point.value)}</div>
+      <div dir="ltr" className="text-end font-semibold text-[var(--foreground)]">
+        {valueFormatter(point.value)}
+      </div>
     </div>
   );
 }
 
-export function BarChartCard({ title, data, color = "var(--series-hajj-umrah)", format = "number", layout = "vertical" }: BarChartCardProps) {
+export function BarChartCard({ title, data, color = "var(--series-hajj-umrah)", format = "number", currency = "NGN", rate = 1, layout = "vertical" }: BarChartCardProps) {
   const isHorizontal = layout === "horizontal";
-  const valueFormatter = resolveFormatter(format);
+  const valueFormatter = resolveFormatter(format, { currency, rate });
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
       <h3 className="mb-3 text-sm font-semibold text-[var(--foreground)]">{title}</h3>
-      <div style={{ height: Math.max(160, data.length * 34) }} className="w-full">
+      <div dir="ltr" style={{ height: Math.max(160, data.length * 34) }} className="w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}

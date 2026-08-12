@@ -1,7 +1,7 @@
 {
-  "name": "Group BI Dashboard",
-  "short_name": "Group BI",
-  "description": "Consolidated BI dashboard for Hajj & Umrah Tourism, Hotel, and Bakery",
+  "name": "Al Nokhbat Al Jawahir Al Oula — Group BI Dashboard",
+  "short_name": "Al Nokhbat BI",
+  "description": "Al Nokhbat Al Jawahir Al Oula consolidated BI dashboard for Hajj & Umrah Tourism, Hotel, and Bakery",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

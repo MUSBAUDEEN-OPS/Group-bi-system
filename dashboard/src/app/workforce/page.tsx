@@ -2,12 +2,18 @@ import { Suspense } from "react";
 import Link from "next/link";
 import type { BusinessUnit } from "@group-bi/kpi-lib";
 import { getDataSource } from "@/data/getDataSource";
+import { getExchangeRate } from "@/data/exchangeRate";
 import { resolveRangeFromSearchParams } from "@/lib/dateRange";
+import { resolveLangFromSearchParams } from "@/lib/i18n/resolveLang";
+import { translations } from "@/lib/i18n/translations";
 import { aggregateKpi } from "@/lib/kpiAggregate";
 import { formatCompactCurrency, formatNumber, formatPercent, monthLabel } from "@/lib/format";
-import { UNIT_LABEL } from "@/lib/chartColors";
+import { convertFromNGN, isCurrency, type Currency } from "@/lib/currency";
+import { unitLabel } from "@/lib/chartColors";
 import { StatTile } from "@/components/StatTile";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
+import { CurrencyToggle } from "@/components/CurrencyToggle";
+import { SectionBackground } from "@/components/SectionBackground";
 import { DataTable } from "@/components/DataTable";
 
 const UNITS: BusinessUnit[] = ["HajjUmrah", "Hotel", "Bakery"];
@@ -15,8 +21,12 @@ const UNITS: BusinessUnit[] = ["HajjUmrah", "Hotel", "Bakery"];
 export default async function WorkforcePage({ searchParams }: PageProps<"/workforce">) {
   const resolvedSearchParams = await searchParams;
   const range = resolveRangeFromSearchParams(resolvedSearchParams);
+  const lang = resolveLangFromSearchParams(resolvedSearchParams);
+  const currency: Currency = isCurrency(resolvedSearchParams.currency as string | undefined) ? (resolvedSearchParams.currency as Currency) : "NGN";
+  const t = translations[lang];
   const dataSource = getDataSource();
-  const snapshot = await dataSource.getKpiSnapshot();
+  const [snapshot, rateInfo] = await Promise.all([dataSource.getKpiSnapshot(), getExchangeRate()]);
+  const moneyCompact = (v: number) => formatCompactCurrency(convertFromNGN(v, currency, rateInfo.rate), currency);
 
   const groupHeadcount = aggregateKpi(snapshot, "Group", "Group Headcount", range.months);
   const turnoverRate = aggregateKpi(snapshot, "Workforce", "Staff Turnover Rate", range.months);
@@ -47,48 +57,59 @@ export default async function WorkforcePage({ searchParams }: PageProps<"/workfo
 
   return (
     <div className="flex flex-col gap-4 pb-8">
+      <SectionBackground variant="workforce" />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link href={`/?${passthroughQuery(resolvedSearchParams)}`} className="text-sm text-[var(--text-secondary)] hover:underline">
-          ← Group Overview
+          {lang === "ar" ? "→" : "←"} {t.nav.backToGroupOverview}
         </Link>
         <Suspense>
-          <DateRangeFilter currentPreset={range.preset} from={resolvedSearchParams.from as string | undefined} to={resolvedSearchParams.to as string | undefined} />
+          <div className="flex flex-wrap items-center gap-2">
+            <CurrencyToggle currentCurrency={currency} rateInfo={rateInfo} lang={lang} />
+            <DateRangeFilter currentPreset={range.preset} from={resolvedSearchParams.from as string | undefined} to={resolvedSearchParams.to as string | undefined} />
+          </div>
         </Suspense>
       </div>
-      <h1 className="text-lg font-semibold text-[var(--foreground)]">Workforce</h1>
+      <h1 className="text-lg font-semibold text-[var(--foreground)]">{t.workforce.pageTitle}</h1>
 
       <section aria-label="Headline KPIs" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Group Headcount" starred value={groupHeadcount !== null ? formatNumber(groupHeadcount) : "—"} />
+        <StatTile label={t.group.groupHeadcount} starred value={groupHeadcount !== null ? formatNumber(groupHeadcount) : "—"} />
         {payrollPctByUnit.map(({ unit, value }) => (
-          <StatTile key={unit} label={`Payroll Cost % — ${UNIT_LABEL[unit]}`} starred value={value !== null ? formatPercent(value) : "—"} />
+          <StatTile key={unit} label={`${t.workforce.payrollCostPctPrefix} — ${unitLabel(unit, lang)}`} starred value={value !== null ? formatPercent(value) : "—"} />
         ))}
       </section>
 
       <section aria-label="Secondary KPIs" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Staff Turnover Rate" value={turnoverRate !== null ? formatPercent(turnoverRate) : "—"} upIsGood={false} />
-        <StatTile label="Overtime Hours" value={overtimeHours !== null ? formatNumber(overtimeHours) : "—"} />
-        <StatTile label="Overtime Cost" value={overtimeCost !== null ? formatCompactCurrency(overtimeCost) : "—"} />
+        <StatTile label={t.workforce.staffTurnoverRate} value={turnoverRate !== null ? formatPercent(turnoverRate) : "—"} upIsGood={false} />
+        <StatTile label={t.workforce.overtimeHours} value={overtimeHours !== null ? formatNumber(overtimeHours) : "—"} />
+        <StatTile label={t.workforce.overtimeCost} value={overtimeCost !== null ? moneyCompact(overtimeCost) : "—"} />
       </section>
 
       <section aria-label="Attendance (placeholder)" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {attendanceByUnit.map(({ unit, value }) => (
-          <StatTile key={unit} label={`Attendance — ${UNIT_LABEL[unit]}`} value={value !== null ? formatPercent(value) : "—"} placeholder deltaLabel="pending real attendance data" />
+          <StatTile
+            key={unit}
+            label={`${t.workforce.attendancePrefix} — ${unitLabel(unit, lang)}`}
+            value={value !== null ? formatPercent(value) : "—"}
+            placeholder
+            placeholderLabel={t.common.placeholder}
+            deltaLabel={t.workforce.pendingRealAttendanceData}
+          />
         ))}
       </section>
 
       <section aria-label="Productivity" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {productivityByUnit.map(({ unit, value }) => (
-          <StatTile key={unit} label={`Revenue / Employee — ${UNIT_LABEL[unit]}`} value={value !== null ? formatCompactCurrency(value) : "—"} />
+          <StatTile key={unit} label={`${t.workforce.revenuePerEmployeePrefix} — ${unitLabel(unit, lang)}`} value={value !== null ? moneyCompact(value) : "—"} />
         ))}
       </section>
 
       <DataTable
-        title={`Headcount by unit / department (as of ${lastMonth ? monthLabel(lastMonth) : "—"})`}
+        title={`${t.workforce.headcountByDeptTitle} (${t.workforce.asOf} ${lastMonth ? monthLabel(lastMonth, lang) : "—"})`}
         rows={headcountRows}
         columns={[
-          { key: "unit", header: "Unit", render: (r) => UNIT_LABEL[r.unit as BusinessUnit] ?? r.unit },
-          { key: "department", header: "Department", render: (r) => r.department },
-          { key: "headcount", header: "Headcount", align: "right", render: (r) => r.headcount.toString() },
+          { key: "unit", header: t.common.unit, render: (r) => unitLabel(r.unit as BusinessUnit, lang) ?? r.unit },
+          { key: "department", header: t.common.department, render: (r) => r.department },
+          { key: "headcount", header: t.common.headcount, align: "right", render: (r) => r.headcount.toString() },
         ]}
       />
     </div>

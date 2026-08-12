@@ -1,4 +1,5 @@
 import type { BusinessUnit } from "@group-bi/kpi-lib";
+import { translations, type Lang } from "./i18n/translations";
 
 // CSS custom properties (defined in globals.css) referenced directly as SVG
 // fill/stroke values — this keeps every chart theme-aware (light/dark) for
@@ -9,11 +10,17 @@ export const SERIES_COLOR: Record<BusinessUnit, string> = {
   Bakery: "var(--series-bakery)",
 };
 
+// English-only fallback map, kept for any call site that hasn't threaded a
+// `lang` through yet. Prefer unitLabel(unit, lang) in new code.
 export const UNIT_LABEL: Record<BusinessUnit, string> = {
   HajjUmrah: "Hajj & Umrah",
   Hotel: "Hotel",
   Bakery: "Bakery",
 };
+
+export function unitLabel(unit: BusinessUnit, lang: Lang = "en"): string {
+  return translations[lang].units[unit];
+}
 
 export const STATUS_COLOR = {
   good: "var(--status-good)",

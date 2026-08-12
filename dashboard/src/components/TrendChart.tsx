@@ -4,30 +4,61 @@ import { useMemo, useState } from "react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatSignedPercent, monthLabelShort } from "@/lib/format";
 import { resolveFormatter, type FormatKind } from "@/lib/formatKind";
+import type { Currency } from "@/lib/currency";
+
+export interface TrendChartLabels {
+  value: string;
+  mom: string;
+  yoy: string;
+  insufficientHistory: string;
+}
+
+const DEFAULT_LABELS: TrendChartLabels = {
+  value: "Value",
+  mom: "MoM %",
+  yoy: "YoY %",
+  insufficientHistory: "Insufficient history for YoY comparison — this dataset covers a single fiscal year (2025).",
+};
 
 export interface TrendChartProps {
   title: string;
   series: Array<{ month: string; value: number }>;
   color?: string;
   format?: FormatKind;
+  currency?: Currency;
+  rate?: number;
+  lang?: "en" | "ar";
   allowComparison?: boolean;
+  labels?: TrendChartLabels;
 }
 
 type Comparison = "value" | "mom" | "yoy";
 
-function ValueTooltip({ active, payload, label, valueFormatter }: any) {
+function ValueTooltip({ active, payload, label, valueFormatter, lang }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm shadow-lg">
-      <div className="text-[var(--text-muted)]">{monthLabelShort(label)}</div>
-      <div className="font-semibold text-[var(--foreground)]">{valueFormatter(payload[0].value)}</div>
+      <div className="text-[var(--text-muted)]">{monthLabelShort(label, lang)}</div>
+      <div dir="ltr" className="text-end font-semibold text-[var(--foreground)]">
+        {valueFormatter(payload[0].value)}
+      </div>
     </div>
   );
 }
 
-export function TrendChart({ title, series, color = "var(--series-hajj-umrah)", format = "number", allowComparison = true }: TrendChartProps) {
+export function TrendChart({
+  title,
+  series,
+  color = "var(--series-hajj-umrah)",
+  format = "number",
+  currency = "NGN",
+  rate = 1,
+  lang = "en",
+  allowComparison = true,
+  labels = DEFAULT_LABELS,
+}: TrendChartProps) {
   const [comparison, setComparison] = useState<Comparison>("value");
-  const valueFormatter = resolveFormatter(format);
+  const valueFormatter = resolveFormatter(format, { currency, rate });
 
   const momSeries = useMemo(
     () =>
@@ -57,7 +88,7 @@ export function TrendChart({ title, series, color = "var(--series-hajj-umrah)", 
                 }`}
                 aria-pressed={comparison === mode}
               >
-                {mode === "value" ? "Value" : mode === "mom" ? "MoM %" : "YoY %"}
+                {mode === "value" ? labels.value : mode === "mom" ? labels.mom : labels.yoy}
               </button>
             ))}
           </div>
@@ -65,17 +96,15 @@ export function TrendChart({ title, series, color = "var(--series-hajj-umrah)", 
       </div>
 
       {hasInsufficientHistory ? (
-        <div className="flex h-48 items-center justify-center text-center text-sm text-[var(--text-muted)]">
-          Insufficient history for YoY comparison — this dataset covers a single fiscal year (2025).
-        </div>
+        <div className="flex h-48 items-center justify-center text-center text-sm text-[var(--text-muted)]">{labels.insufficientHistory}</div>
       ) : (
-        <div className="h-48 w-full">
+        <div dir="ltr" className="h-48 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={comparison === "mom" ? momSeries : series} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="var(--gridline)" strokeDasharray="0" vertical={false} />
               <XAxis
                 dataKey="month"
-                tickFormatter={monthLabelShort}
+                tickFormatter={(m) => monthLabelShort(m, lang)}
                 stroke="var(--baseline)"
                 tick={{ fill: "var(--text-muted)", fontSize: 12 }}
                 axisLine={{ stroke: "var(--baseline)" }}
@@ -87,11 +116,11 @@ export function TrendChart({ title, series, color = "var(--series-hajj-umrah)", 
                 tick={{ fill: "var(--text-muted)", fontSize: 12 }}
                 axisLine={false}
                 tickLine={false}
-                width={comparison === "mom" ? 48 : 56}
+                width={comparison === "mom" ? 48 : 64}
               />
               <Tooltip
                 content={(props) => (
-                  <ValueTooltip {...props} valueFormatter={comparison === "mom" ? (v: number) => formatSignedPercent(v) : valueFormatter} />
+                  <ValueTooltip {...props} lang={lang} valueFormatter={comparison === "mom" ? (v: number) => formatSignedPercent(v) : valueFormatter} />
                 )}
               />
               <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={{ r: 3, fill: color, strokeWidth: 0 }} connectNulls isAnimationActive={false} />

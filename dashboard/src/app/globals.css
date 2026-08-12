@@ -88,3 +88,118 @@ body {
     color: #000000 !important;
   }
 }
+
+/* Per-section ambient motion background — a single slowly-rotating radial
+   gradient, low opacity, GPU-cheap (transform only, no filter/blur so it
+   stays smooth on phones). Decorative only: paused under reduced-motion,
+   hidden from print, and never touches text contrast since it sits behind
+   opaque card surfaces. */
+.section-bg-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+}
+.section-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150vmax;
+  height: 150vmax;
+  margin-top: -75vmax;
+  margin-left: -75vmax;
+  opacity: 0.08;
+  animation: section-bg-spin 48s linear infinite;
+}
+@media (prefers-color-scheme: dark) {
+  .section-bg {
+    opacity: 0.14;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-bg {
+    animation: none;
+  }
+}
+@keyframes section-bg-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.section-bg--group {
+  background: conic-gradient(from 0deg, var(--brand-navy), transparent 25%, var(--brand-gold) 50%, transparent 75%, var(--brand-navy));
+}
+.section-bg--hajj-umrah {
+  background: conic-gradient(from 0deg, #c9971f, transparent 25%, #f2e1b0 50%, transparent 75%, #c9971f);
+}
+.section-bg--hotel {
+  background: conic-gradient(from 0deg, #2a78d6, transparent 25%, #6fc7bd 50%, transparent 75%, #2a78d6);
+}
+.section-bg--bakery {
+  background: conic-gradient(from 0deg, #c9691f, transparent 25%, #f0c48a 50%, transparent 75%, #c9691f);
+}
+.section-bg--workforce {
+  background: conic-gradient(from 0deg, #52617a, transparent 25%, #c3c2b7 50%, transparent 75%, #52617a);
+}
+
+/* Motion icons — StatTile trend arrows and the priority-KPI star. Motion
+   carries meaning here (direction of change), not decoration: a pop-in on
+   mount plus a gentle directional nudge (up trends float up, down trends
+   sink down) that loops slowly enough to read as ambient, not distracting. */
+@keyframes icon-pop-in {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes trend-nudge-up {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes trend-nudge-down {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(2px);
+  }
+}
+.motion-icon-pop {
+  animation: icon-pop-in 320ms ease-out both;
+}
+.motion-icon-trend-up {
+  animation:
+    icon-pop-in 320ms ease-out both,
+    trend-nudge-up 2.4s ease-in-out 320ms infinite;
+}
+.motion-icon-trend-down {
+  animation:
+    icon-pop-in 320ms ease-out both,
+    trend-nudge-down 2.4s ease-in-out 320ms infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion-icon-pop,
+  .motion-icon-trend-up,
+  .motion-icon-trend-down {
+    animation: none;
+  }
+}
