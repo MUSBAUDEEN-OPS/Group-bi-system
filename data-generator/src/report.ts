@@ -1,5 +1,4 @@
-import type { GroupBiDataset } from "@group-bi/kpi-lib";
-import type { SummaryOutput } from "./summarize.js";
+import type { GroupBiDataset, SummaryOutput } from "@group-bi/kpi-lib";
 
 export function buildDataQualityReport(dataset: Pick<GroupBiDataset, "raw" | "reference">, summary: SummaryOutput, seed: number): string {
   const { raw, reference } = dataset;

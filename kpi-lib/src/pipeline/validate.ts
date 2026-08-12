@@ -1,6 +1,6 @@
-import type { GroupBiDataset } from "@group-bi/kpi-lib";
+import type { GroupBiDataset } from "../types.js";
 
-class ReferentialIntegrityError extends Error {}
+export class ReferentialIntegrityError extends Error {}
 
 function checkFk<T>(
   rows: T[],

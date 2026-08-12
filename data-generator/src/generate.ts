@@ -2,12 +2,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 import { faker } from "@faker-js/faker";
-import type { BusinessUnit, GroupBiDataset } from "@group-bi/kpi-lib";
+import { revenueKpis, summarizeDataset, validateDataset, type BusinessUnit, type GroupBiDataset } from "@group-bi/kpi-lib";
 import { Rng } from "./rng.js";
 import { KPI_CONFIG } from "./config.js";
 import { writeCsv } from "./csv.js";
-import { validateDataset } from "./validate.js";
-import { summarizeDataset } from "./summarize.js";
 import { buildDataQualityReport } from "./report.js";
 import {
   generateAgents,
@@ -22,7 +20,7 @@ import { generateHotelData } from "./entities/hotel.js";
 import { generateBakeryData } from "./entities/bakery.js";
 import { generateEmployees, generatePayroll } from "./entities/hr.js";
 import { generateExpenses } from "./entities/finance.js";
-import { monthlyBakeryRevenue, monthlyHajjUmrahRevenue, monthlyHotelFnbRevenue, monthlyHotelRoomRevenue } from "./revenue.js";
+const { monthlyBakeryRevenue, monthlyHajjUmrahRevenue, monthlyHotelFnbRevenue, monthlyHotelRoomRevenue } = revenueKpis;
 
 function parseSeed(): number {
   const arg = process.argv.find((a) => a.startsWith("--seed"));

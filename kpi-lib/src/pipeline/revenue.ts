@@ -1,5 +1,5 @@
-import type { RawBooking, RawDeparture, RawFnBSale, RawReservation, RawSale } from "@group-bi/kpi-lib";
-import { monthOf } from "./dates.js";
+import type { RawBooking, RawDeparture, RawFnBSale, RawReservation, RawSale } from "../types.js";
+import { monthOf } from "../dateUtils.js";
 
 function bucketByMonth(entries: Array<[string, number]>): Record<string, number> {
   const result: Record<string, number> = {};

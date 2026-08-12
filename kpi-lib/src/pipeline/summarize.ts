@@ -1,29 +1,23 @@
-import {
-  bakeryKpis,
-  groupKpis,
-  hajjUmrahKpis,
-  hotelKpis,
-  workforceKpis,
-  type BusinessUnit,
-  type GroupBiDataset,
-  type KpiConfig,
-  type SummaryBookingChannelMix,
-  type SummaryKpiSnapshot,
-  type SummaryMonthly,
-  type SummaryRevenueMix,
-  type SummaryTopProduct,
-} from "@group-bi/kpi-lib";
-import { OPEX_CATEGORY_NAMES } from "./entities/finance.js";
-import {
-  departureMonthLookup,
-  monthlyBakeryRevenue,
-  monthlyHajjUmrahRevenue,
-  monthlyHotelFnbRevenue,
-  monthlyHotelRoomRevenue,
-} from "./revenue.js";
+import * as bakeryKpis from "../bakery.js";
+import * as groupKpis from "../group.js";
+import * as hajjUmrahKpis from "../hajjUmrah.js";
+import * as hotelKpis from "../hotel.js";
+import * as workforceKpis from "../workforce.js";
+import { monthsBetween } from "../dateUtils.js";
+import { OPEX_CATEGORY_NAMES } from "./categories.js";
+import { departureMonthLookup, monthlyBakeryRevenue, monthlyHajjUmrahRevenue, monthlyHotelFnbRevenue, monthlyHotelRoomRevenue } from "./revenue.js";
+import type { KpiConfig } from "../config.js";
+import type {
+  BusinessUnit,
+  GroupBiDataset,
+  SummaryBookingChannelMix,
+  SummaryKpiSnapshot,
+  SummaryMonthly,
+  SummaryRevenueMix,
+  SummaryTopProduct,
+} from "../types.js";
 
 const UNITS: BusinessUnit[] = ["HajjUmrah", "Hotel", "Bakery"];
-const MONTHS = Array.from({ length: 12 }, (_, i) => `2025-${String(i + 1).padStart(2, "0")}`);
 
 function daysInMonth(month: string): number {
   const [y, m] = month.split("-").map(Number);
@@ -32,6 +26,32 @@ function daysInMonth(month: string): number {
 
 function monthOfDate(d: string): string {
   return d.slice(0, 7);
+}
+
+// The month range is derived from the data itself rather than a fixed
+// fiscal year — the synthetic generator's dataset happens to span exactly
+// one calendar year, but real, ongoing data entry (e.g. via Google Sheets)
+// has no such fixed boundary. Only *primary* transaction dates are scanned
+// (when the business activity itself happened) — deliberately excluding
+// trailing follow-up dates (visa processing, feedback surveys, guest
+// ratings) that land a few days *after* their parent event and would
+// otherwise stretch the reporting window by a sparse, mostly-empty extra
+// month every time an edge-of-period event has a delayed follow-up.
+function deriveMonthRange(raw: Pick<GroupBiDataset, "raw">["raw"]): string[] {
+  const dates: string[] = [
+    ...raw.bookings.map((b) => b.date_booked),
+    ...raw.departures.map((d) => d.departure_date),
+    ...raw.reservations.map((r) => r.checkin_date),
+    ...raw.fnbSales.map((s) => s.date),
+    ...raw.production.map((p) => p.date),
+    ...raw.sales.map((s) => s.date),
+    ...raw.waste.map((w) => w.date),
+    ...raw.expenses.map((e) => e.date),
+    ...raw.payroll.map((p) => p.month),
+  ];
+  if (dates.length === 0) return [];
+  const months = dates.map(monthOfDate).sort();
+  return monthsBetween(months[0], months[months.length - 1]);
 }
 
 export interface SummaryOutput {
@@ -47,6 +67,7 @@ export function summarizeDataset(
   config: KpiConfig,
 ): SummaryOutput {
   const { raw, reference } = dataset;
+  const MONTHS = deriveMonthRange(raw);
   const snapshot: SummaryKpiSnapshot[] = [];
   const push = (business_unit: SummaryKpiSnapshot["business_unit"], month: string, kpi_name: string, kpi_value: number) =>
     snapshot.push({ month, business_unit, kpi_name, kpi_value });

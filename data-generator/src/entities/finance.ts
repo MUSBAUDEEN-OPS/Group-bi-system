@@ -1,8 +1,8 @@
-import type { BusinessUnit, RawExpense } from "@group-bi/kpi-lib";
+import { OPEX_CATEGORY_NAMES, type BusinessUnit, type RawExpense } from "@group-bi/kpi-lib";
 import type { Rng } from "../rng.js";
 import { ANOMALY_MONTHS } from "../config.js";
 
-const OPEX_CATEGORIES = ["Marketing", "Utilities", "Maintenance", "Rent & Facilities"] as const;
+const OPEX_CATEGORIES = OPEX_CATEGORY_NAMES;
 
 // OpEx per category as a fraction of that unit's revenue that month, plus a
 // fixed monthly floor (rent/utilities don't drop to zero in a slow month).
@@ -89,6 +89,3 @@ export function generateExpenses(
 
   return expenses;
 }
-
-export const OPEX_CATEGORY_NAMES: readonly string[] = OPEX_CATEGORIES;
-export const COGS_CATEGORY_NAMES = ["Package Delivery Costs", "F&B Cost of Goods"] as const;
