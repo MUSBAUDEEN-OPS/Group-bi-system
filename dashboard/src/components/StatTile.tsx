@@ -33,7 +33,7 @@ export function StatTile({
   unit,
 }: StatTileProps) {
   const body = (
-    <div className="flex h-full flex-col justify-between gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 transition-shadow hover:shadow-md">
+    <div className="data-card flex h-full flex-col justify-between gap-2 rounded-xl p-4 transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-2">
         <span className="flex items-center gap-1 text-sm font-medium text-[var(--text-secondary)]">
           {starred && <StarBadgeIcon />}

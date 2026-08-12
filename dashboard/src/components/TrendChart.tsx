@@ -73,7 +73,7 @@ export function TrendChart({
   const hasInsufficientHistory = comparison === "yoy";
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+    <div className="data-card rounded-xl p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-[var(--foreground)]">{title}</h3>
         {allowComparison && (
