@@ -19,6 +19,7 @@ export function NavHeader() {
     { href: "/hotel", label: t.hotel },
     { href: "/bakery", label: t.bakery },
     { href: "/workforce", label: t.workforce },
+    { href: "/data-entry", label: t.dataEntry },
   ];
 
   return (

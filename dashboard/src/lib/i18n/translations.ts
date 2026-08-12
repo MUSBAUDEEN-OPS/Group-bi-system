@@ -10,6 +10,7 @@ export const translations = {
       hotel: "Hotel",
       bakery: "Bakery",
       workforce: "Workforce",
+      dataEntry: "Data Entry",
       exportPdf: "Export PDF",
       backToGroupOverview: "Group Overview",
     },
@@ -124,6 +125,15 @@ export const translations = {
       Bakery: "Bakery",
       Workforce: "Workforce",
     },
+    dataEntry: {
+      pageTitle: "Data Entry",
+      pageSubtitle: "One form per event — pick the right one below and submit. Each entry is added straight to the record; nothing here touches the dashboard directly.",
+      groupUnitLabel: "Group (Finance & HR)",
+      openForm: "Open form",
+      notSetUp: "Not set up yet",
+      setupGuideLinkText: "Setup guide",
+      setupGuideHint: "Once this form exists, add its link here.",
+    },
   },
   ar: {
     nav: {
@@ -134,6 +144,7 @@ export const translations = {
       hotel: "الفندق",
       bakery: "المخبز",
       workforce: "القوى العاملة",
+      dataEntry: "إدخال البيانات",
       exportPdf: "تصدير PDF",
       backToGroupOverview: "نظرة عامة على المجموعة",
     },
@@ -247,6 +258,15 @@ export const translations = {
       Hotel: "الفندق",
       Bakery: "المخبز",
       Workforce: "القوى العاملة",
+    },
+    dataEntry: {
+      pageTitle: "إدخال البيانات",
+      pageSubtitle: "نموذج واحد لكل حدث — اختر النموذج المناسب أدناه وأرسله. تُضاف كل بيانات مباشرة إلى السجل؛ لا شيء هنا يؤثر على لوحة البيانات مباشرة.",
+      groupUnitLabel: "المجموعة (المالية والموارد البشرية)",
+      openForm: "فتح النموذج",
+      notSetUp: "لم يتم الإعداد بعد",
+      setupGuideLinkText: "دليل الإعداد",
+      setupGuideHint: "بمجرد إنشاء هذا النموذج، أضف رابطه هنا.",
     },
   },
 } as const;
