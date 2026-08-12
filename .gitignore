@@ -11,8 +11,9 @@ dashboard/out/
 # typescript build info
 *.tsbuildinfo
 
-# kpi-lib build output (regenerated via npm's pre<script> hooks)
+# kpi-lib / data-generator build output (regenerated via npm's pre<script> hooks)
 kpi-lib/dist/
+data-generator/dist/
 
 # env files
 .env
@@ -29,3 +30,6 @@ coverage/
 # the installed `next` package) and shouldn't be committed
 dashboard/AGENTS.md
 dashboard/CLAUDE.md
+
+.vercel
+.env*
