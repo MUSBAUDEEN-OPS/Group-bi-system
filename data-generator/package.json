@@ -1,0 +1,19 @@
+{
+  "name": "@group-bi/data-generator",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Synthetic data generator for the Group BI foundation phase",
+  "type": "module",
+  "scripts": {
+    "generate": "tsx src/generate.ts"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.2.0",
+    "@group-bi/kpi-lib": "*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "@types/node": "^22.9.0"
+  }
+}

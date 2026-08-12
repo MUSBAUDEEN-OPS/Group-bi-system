@@ -1,0 +1,21 @@
+{
+  "name": "group-bi-system",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Group BI & Automation System — foundation phase (synthetic data + dashboard prototype)",
+  "workspaces": [
+    "kpi-lib",
+    "data-generator",
+    "dashboard"
+  ],
+  "scripts": {
+    "build:kpi-lib": "npm run build -w kpi-lib",
+    "pregenerate": "npm run build:kpi-lib",
+    "generate": "npm run generate -w data-generator",
+    "predev": "npm run build:kpi-lib",
+    "dev": "npm run dev -w dashboard",
+    "prebuild": "npm run build:kpi-lib",
+    "build": "npm run build -w dashboard",
+    "test": "npm run test -w kpi-lib"
+  }
+}

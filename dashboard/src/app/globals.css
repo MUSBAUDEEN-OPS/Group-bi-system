@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand chrome (placeholder — swap these two for real branding later) */
+  --brand-navy: #16233f;
+  --brand-navy-ink: #0d1526;
+  --brand-gold: #c9971f;
+  --brand-gold-ink: #7a5c12;
+
+  /* Page chrome */
+  --background: #f9f9f7;
+  --surface: #fcfcfb;
+  --foreground: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --gridline: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+
+  /* Categorical series (validated — see dataviz skill; fixed order, never cycled) */
+  --series-hajj-umrah: #2a78d6; /* slot 1 blue */
+  --series-hotel: #eb6834; /* slot 2 orange */
+  --series-bakery: #1baf7a; /* slot 3 aqua */
+  --series-reserve: #eda100; /* slot 4 yellow — reserved, not assigned to a unit */
+
+  /* Status (fixed — never themed) */
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --status-critical: #d03b3b;
+  --status-good-text: #006300;
+
+  /* Sequential (blue) for single-hue magnitude charts */
+  --sequential-100: #cde2fb;
+  --sequential-400: #3987e5;
+  --sequential-700: #0d366b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-gold: var(--brand-gold);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0d0d0d;
+    --surface: #1a1a19;
+    --foreground: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --gridline: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+
+    --series-hajj-umrah: #3987e5;
+    --series-hotel: #d95926;
+    --series-bakery: #199e70;
+    --series-reserve: #c98500;
+
+    --status-good: #0ca30c;
+    --status-warning: #fab219;
+    --status-serious: #ec835a;
+    --status-critical: #e66767;
+    --status-good-text: #0ca30c;
+
+    --brand-navy: #2a3f66;
+    --brand-gold: #e0b545;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}

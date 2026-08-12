@@ -1,0 +1,15 @@
+{
+  "name": "Group BI Dashboard",
+  "short_name": "Group BI",
+  "description": "Consolidated BI dashboard for Hajj & Umrah Tourism, Hotel, and Bakery",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d0d0d",
+  "theme_color": "#16233f",
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
