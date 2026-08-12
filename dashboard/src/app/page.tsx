@@ -127,7 +127,7 @@ export default async function GroupOverviewPage({ searchParams }: PageProps<"/">
               <Link
                 key={unit}
                 href={`${UNIT_HREF[unit]}${query ? `?${query}` : ""}`}
-                className="data-card flex items-center justify-between rounded-xl p-3 transition-shadow hover:shadow-md"
+                className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 transition-shadow hover:shadow-md"
               >
                 <div>
                   <div className="text-sm font-medium text-[var(--foreground)]">{unitLabel(unit, lang)}</div>

@@ -7,7 +7,7 @@ export interface DataTableColumn<T> {
 
 export function DataTable<T>({ title, columns, rows }: { title: string; columns: DataTableColumn<T>[]; rows: T[] }) {
   return (
-    <div className="data-card rounded-xl p-4">
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
       <h3 className="mb-3 text-sm font-semibold text-[var(--foreground)]">{title}</h3>
       <div className="overflow-x-auto">
         <table className="w-full min-w-max border-collapse text-sm">

@@ -31,7 +31,7 @@ export function BarChartCard({ title, data, color = "var(--series-hajj-umrah)", 
   const isHorizontal = layout === "horizontal";
   const valueFormatter = resolveFormatter(format, { currency, rate });
   return (
-    <div className="data-card rounded-xl p-4">
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
       <h3 className="mb-3 text-sm font-semibold text-[var(--foreground)]">{title}</h3>
       <div dir="ltr" style={{ height: Math.max(160, data.length * 34) }} className="w-full">
         <ResponsiveContainer width="100%" height="100%">

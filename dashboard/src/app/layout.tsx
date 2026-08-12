@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { NavHeader } from "@/components/NavHeader";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { HtmlDirSync } from "@/components/HtmlDirSync";
-import { AmbientBackground } from "@/components/AmbientBackground";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,7 +39,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
-        <AmbientBackground />
         <Suspense>
           <HtmlDirSync />
         </Suspense>
