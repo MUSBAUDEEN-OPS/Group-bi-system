@@ -5,11 +5,14 @@ dashboard prototype for a group with three business lines under one
 ownership — **Hajj & Umrah Tourism**, **Hotel**, and **Bakery** — plus a
 consolidated **Group** view for the Chairman and stakeholders.
 
-This is the **foundation phase**: everything here runs on generated
-synthetic data. No real company data or external services are touched. The
-long-term production data source will be Google Sheets — the dashboard is
-already built against a swappable data-adapter interface so that swap won't
-require any UI changes (see [Pointing this at real Google Sheets](#pointing-this-at-real-google-sheets-later)).
+This started as the **foundation phase**, running entirely on generated
+synthetic data with no real company data or external services touched. The
+dashboard now also supports a real, live data source — Google Sheets — via
+a swappable data-adapter interface, so pointing it at real data is a
+config change, not a rebuild (see
+[Pointing this at real Google Sheets](#pointing-this-at-real-google-sheets)).
+Real data entry hasn't started yet; the demo data still runs by default
+until the env vars below are set.
 
 ## Project structure
 
@@ -142,22 +145,45 @@ than a real D&A schedule.
   separate navy/gold placeholder theme, swappable in one place
   (`dashboard/src/app/globals.css` custom properties).
 
-## Pointing this at real Google Sheets, later
+## Pointing this at real Google Sheets
 
 The dashboard never talks to the filesystem directly — every page calls
-`getDataSource()` (`dashboard/src/data/getDataSource.ts`), which returns a
-`DataSource` (`dashboard/src/data/DataSource.ts`). Today that's
-`LocalFileSource`, which reads the generator's CSVs off disk. To go live:
+`getDataSource()` (`dashboard/src/data/getDataSource.ts`), which picks
+between two implementations of the `DataSource` interface
+(`dashboard/src/data/DataSource.ts`): `LocalFileSource` (the synthetic demo
+data) or `GoogleSheetsSource` (real data), automatically, based on whether
+the `GOOGLE_SHEETS_*` env vars are set. No page, component, or KPI
+calculation changes either way — both implementations feed the exact same
+interface.
 
-1. Implement the same `DataSource` interface in `GoogleSheetsSource.ts` (a
-   stub with the required env vars and setup steps already documented
-   inline) — one workbook per business unit plus a Group consolidation
-   workbook, read via `spreadsheets.values.get` on tabs named exactly like
-   the CSVs (`Summary_Monthly`, `Summary_KPISnapshot`, etc.).
-2. Flip the one line in `getDataSource.ts` from `new LocalFileSource()` to
-   `new GoogleSheetsSource()`.
-3. No page, component, or KPI calculation changes — they all go through the
-   `DataSource` interface already.
+`GoogleSheetsSource` is **read-only** — it only ever needs Viewer access on
+your workbooks and never writes anything back. It reads the raw entries,
+validates them, and computes every KPI on-demand each time the dashboard
+loads (cached briefly — see `docs/schema.md`), rather than a scheduled job
+that writes precomputed numbers back into Sheets.
 
-See `dashboard/.env.example` for the environment variables
-`GoogleSheetsSource` will need.
+### Setup checklist
+
+1. **Google Cloud**: create/select a project → enable the **Google Sheets
+   API** → create a service account → generate a JSON key. Note the
+   service account's email and private key.
+2. **Workbooks**: create 4 Google Sheets workbooks — Hajj & Umrah, Hotel,
+   Bakery, Group — with tabs and columns matching `docs/schema.md` exactly
+   (tab names are case-sensitive). Share each workbook with the service
+   account's email as **Viewer**.
+3. **Business assumptions**: add a `Reference_Config` tab to the Group
+   workbook (see `docs/schema.md` for the key/value list — capital
+   employed per unit, opening cash balance, etc). Any key you skip falls
+   back to a neutral default.
+4. **Env vars** — locally in `dashboard/.env.local`, and in production via
+   `vercel env add` (see `dashboard/.env.example` for the full list):
+   `GOOGLE_SHEETS_CLIENT_EMAIL`, `GOOGLE_SHEETS_PRIVATE_KEY`, and the 4
+   `GOOGLE_SHEETS_SPREADSHEET_ID_*` vars (the ID in a sheet's URL between
+   `/d/` and `/edit`).
+5. Reload the dashboard — once every var above is set, `getDataSource()`
+   switches to `GoogleSheetsSource` with no further changes.
+
+A bad reference (e.g. a booking's `agent_id` that isn't in
+`Reference_Agents`) surfaces as a clear, specific error naming the tab and
+the bad value, rather than a silent wrong number or a crash — see
+`validateDataset` in `kpi-lib/src/pipeline/validate.ts`.

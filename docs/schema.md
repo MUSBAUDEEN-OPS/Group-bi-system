@@ -7,6 +7,24 @@ append-only (one row per real-world event); `Reference_*` tables are
 lookup/master data; `Summary_*` tables are precomputed monthly rollups the
 dashboard reads from (it never recomputes from raw data at render time).
 
+## Google Sheets workbook layout (real data)
+
+`GoogleSheetsSource` (`dashboard/src/data/GoogleSheetsSource.ts`) reads from
+**4 separate Google Sheets workbooks**, one `GOOGLE_SHEETS_SPREADSHEET_ID_*`
+env var each — every table below lives as its own tab, named exactly as
+shown, in the workbook for its section:
+
+| Workbook | Env var | Tabs |
+|---|---|---|
+| Hajj & Umrah | `..._HAJJ_UMRAH` | every table in [Hajj & Umrah Tourism](#hajj--umrah-tourism) |
+| Hotel | `..._HOTEL` | every table in [Hotel](#hotel) |
+| Bakery | `..._BAKERY` | every table in [Bakery](#bakery) |
+| Group | `..._GROUP` | every table in [Cross-unit (Finance & HR)](#cross-unit-finance--hr), plus `Reference_Config` |
+
+Only `Raw_*` and `Reference_*` tabs need to exist — `Summary_*` tables are
+computed on the fly by the dashboard itself (see the note at the bottom of
+this file) and never need to be created in Sheets.
+
 ## Hajj & Umrah Tourism
 
 | Table | Key fields |
@@ -55,6 +73,39 @@ alone isn't a reliable join key once two different customers can share a name.
 attributable to a single unit (e.g. Chairman's office, group marketing) — it
 feeds the Cash Position KPI only, not any unit's `Summary_Monthly.opex`.
 
+`Raw_Expenses.category` classification is a **fixed vocabulary**, not free
+text — `gross_profit`/`net_profit` compute correctly only when a row's
+`category` is one of the recognized OpEx names (`Marketing`, `Utilities`,
+`Maintenance`, `Rent & Facilities`) or COGS names (`Package Delivery Costs`
+for HajjUmrah, `F&B Cost of Goods` for Hotel) — see
+`kpi-lib/src/pipeline/categories.ts`. A `Bakery` row's COGS instead comes
+straight from `Raw_Production.ingredient_cost`, not from `Raw_Expenses` at
+all. Any other category is simply excluded from both COGS and OpEx (it
+still exists as a row, just doesn't affect profit figures) — until the
+category-classification logic is made chart-of-accounts-driven, a known
+possible follow-up.
+
+### Reference_Config (Group workbook — real data only)
+
+A real `GoogleSheetsSource` deployment needs a handful of business
+assumptions the raw entries can't supply on their own — the same figures
+the synthetic generator seeds from `data-generator/src/config.ts`. These
+live in a simple two-column `key, value` tab in the **Group** workbook.
+Any key left out (or the whole tab left empty) falls back to a neutral
+default rather than failing:
+
+| key | meaning | default if omitted |
+|---|---|---|
+| `ebitda_addback_pct` | flat EBITDA add-back, fraction of revenue | `0.08` |
+| `opening_cash_balance` | Cash Position's starting balance | `0` |
+| `capital_employed_hajj_umrah` / `_hotel` / `_bakery` | ROI denominator per unit | `1` |
+| `attendance_placeholder_hajj_umrah` / `_hotel` / `_bakery` | Attendance/Punctuality KPI (still a labeled placeholder — see brief) | `1` |
+
+Budget Target (for Budget vs Actual Variance) isn't in this table — it's
+computed automatically as each unit's own trailing average monthly revenue
+× 1.03, the same placeholder approach the brief specifies for when no
+prior year exists to base a target on.
+
 ## Summary (computed)
 
 | Table | Shape |
@@ -67,7 +118,18 @@ feeds the Cash Position KPI only, not any unit's `Summary_Monthly.opex`.
 
 The last three exist because a single tidy `(month, kpi_name, kpi_value)` row
 doesn't cleanly fit ranked lists or categorical breakdowns — they're still
-fully precomputed at generation time, just shaped for their specific chart.
+fully precomputed, just shaped for their specific chart.
+
+**Two different "precomputed"s, same computation code either way**
+(`kpi-lib/src/pipeline/summarize.ts`). `LocalFileSource` (the synthetic
+demo data) reads these tables from CSVs the generator wrote to disk ahead
+of time. `GoogleSheetsSource` (real data) has nowhere to write them back
+to — by design, it only ever has Viewer access — so it computes them
+on-demand from the raw Sheets tabs each time the dashboard loads, cached
+per-request and for 10 minutes across requests. Either way, the dashboard
+itself only ever reads already-computed summary rows; it never re-derives
+a KPI from raw data at render time, and neither `DataSource`
+implementation exposes raw tables to the UI at all.
 
 ## KPI aggregation across a date range
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { BusinessUnit } from "@group-bi/kpi-lib";
 import { getDataSource } from "@/data/getDataSource";
 import { getExchangeRate } from "@/data/exchangeRate";
-import { resolveRangeFromSearchParams } from "@/lib/dateRange";
+import { deriveDataBounds, resolveRangeFromSearchParams } from "@/lib/dateRange";
 import { resolveLangFromSearchParams } from "@/lib/i18n/resolveLang";
 import { translations } from "@/lib/i18n/translations";
 import { aggregateKpi } from "@/lib/kpiAggregate";
@@ -20,12 +20,12 @@ const UNITS: BusinessUnit[] = ["HajjUmrah", "Hotel", "Bakery"];
 
 export default async function WorkforcePage({ searchParams }: PageProps<"/workforce">) {
   const resolvedSearchParams = await searchParams;
-  const range = resolveRangeFromSearchParams(resolvedSearchParams);
   const lang = resolveLangFromSearchParams(resolvedSearchParams);
   const currency: Currency = isCurrency(resolvedSearchParams.currency as string | undefined) ? (resolvedSearchParams.currency as Currency) : "NGN";
   const t = translations[lang];
   const dataSource = getDataSource();
   const [snapshot, rateInfo] = await Promise.all([dataSource.getKpiSnapshot(), getExchangeRate()]);
+  const range = resolveRangeFromSearchParams(resolvedSearchParams, deriveDataBounds(snapshot));
   const moneyCompact = (v: number) => formatCompactCurrency(convertFromNGN(v, currency, rateInfo.rate), currency);
 
   const groupHeadcount = aggregateKpi(snapshot, "Group", "Group Headcount", range.months);
@@ -65,7 +65,7 @@ export default async function WorkforcePage({ searchParams }: PageProps<"/workfo
         <Suspense>
           <div className="flex flex-wrap items-center gap-2">
             <CurrencyToggle currentCurrency={currency} rateInfo={rateInfo} lang={lang} />
-            <DateRangeFilter currentPreset={range.preset} from={resolvedSearchParams.from as string | undefined} to={resolvedSearchParams.to as string | undefined} />
+            <DateRangeFilter currentPreset={range.preset} from={resolvedSearchParams.from as string | undefined} to={resolvedSearchParams.to as string | undefined} bounds={range.bounds} />
           </div>
         </Suspense>
       </div>

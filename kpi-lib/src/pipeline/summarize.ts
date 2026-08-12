@@ -37,7 +37,7 @@ function monthOfDate(d: string): string {
 // ratings) that land a few days *after* their parent event and would
 // otherwise stretch the reporting window by a sparse, mostly-empty extra
 // month every time an edge-of-period event has a delayed follow-up.
-function deriveMonthRange(raw: Pick<GroupBiDataset, "raw">["raw"]): string[] {
+export function deriveMonthRange(raw: Pick<GroupBiDataset, "raw">["raw"]): string[] {
   const dates: string[] = [
     ...raw.bookings.map((b) => b.date_booked),
     ...raw.departures.map((d) => d.departure_date),

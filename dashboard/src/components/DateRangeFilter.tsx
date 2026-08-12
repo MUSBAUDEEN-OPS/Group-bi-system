@@ -1,12 +1,22 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { DATA_EARLIEST_MONTH, DATA_LATEST_MONTH, type RangePreset } from "@/lib/dateRange";
+import type { DataBounds, RangePreset } from "@/lib/dateRange";
 import { translations, type Lang } from "@/lib/i18n/translations";
 
 const PRESETS: RangePreset[] = ["this-month", "last-3-months", "ytd"];
 
-export function DateRangeFilter({ currentPreset, from, to }: { currentPreset: RangePreset; from?: string; to?: string }) {
+export function DateRangeFilter({
+  currentPreset,
+  from,
+  to,
+  bounds,
+}: {
+  currentPreset: RangePreset;
+  from?: string;
+  to?: string;
+  bounds: DataBounds;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -33,8 +43,8 @@ export function DateRangeFilter({ currentPreset, from, to }: { currentPreset: Ra
     const params = new URLSearchParams(searchParams.toString());
     params.set("range", "custom");
     params.set(field, value);
-    if (field === "from" && !params.get("to")) params.set("to", DATA_LATEST_MONTH);
-    if (field === "to" && !params.get("from")) params.set("from", DATA_EARLIEST_MONTH);
+    if (field === "from" && !params.get("to")) params.set("to", bounds.latestMonth);
+    if (field === "to" && !params.get("from")) params.set("from", bounds.earliestMonth);
     router.push(`${pathname}?${params.toString()}`);
   }
 
@@ -73,9 +83,9 @@ export function DateRangeFilter({ currentPreset, from, to }: { currentPreset: Ra
             {t.from}
             <input
               type="month"
-              value={from ?? DATA_EARLIEST_MONTH}
-              min={DATA_EARLIEST_MONTH}
-              max={DATA_LATEST_MONTH}
+              value={from ?? bounds.earliestMonth}
+              min={bounds.earliestMonth}
+              max={bounds.latestMonth}
               onChange={(e) => setCustom("from", e.target.value)}
               className="min-h-11 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2"
             />
@@ -84,9 +94,9 @@ export function DateRangeFilter({ currentPreset, from, to }: { currentPreset: Ra
             {t.to}
             <input
               type="month"
-              value={to ?? DATA_LATEST_MONTH}
-              min={DATA_EARLIEST_MONTH}
-              max={DATA_LATEST_MONTH}
+              value={to ?? bounds.latestMonth}
+              min={bounds.earliestMonth}
+              max={bounds.latestMonth}
               onChange={(e) => setCustom("to", e.target.value)}
               className="min-h-11 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2"
             />

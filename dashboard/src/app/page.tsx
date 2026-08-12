@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { BusinessUnit, SummaryMonthly } from "@group-bi/kpi-lib";
 import { getDataSource } from "@/data/getDataSource";
 import { getExchangeRate } from "@/data/exchangeRate";
-import { resolveRangeFromSearchParams } from "@/lib/dateRange";
+import { deriveDataBounds, resolveRangeFromSearchParams } from "@/lib/dateRange";
 import { resolveLangFromSearchParams } from "@/lib/i18n/resolveLang";
 import { translations } from "@/lib/i18n/translations";
 import { aggregateKpi, kpiSeries } from "@/lib/kpiAggregate";
@@ -40,13 +40,13 @@ function searchParamsToQuery(searchParams: Record<string, string | string[] | un
 
 export default async function GroupOverviewPage({ searchParams }: PageProps<"/">) {
   const resolvedSearchParams = await searchParams;
-  const range = resolveRangeFromSearchParams(resolvedSearchParams);
   const lang = resolveLangFromSearchParams(resolvedSearchParams);
   const currency: Currency = isCurrency(resolvedSearchParams.currency as string | undefined) ? (resolvedSearchParams.currency as Currency) : "NGN";
   const query = searchParamsToQuery(resolvedSearchParams);
   const t = translations[lang];
   const dataSource = getDataSource();
   const [snapshot, monthly, rateInfo] = await Promise.all([dataSource.getKpiSnapshot(), dataSource.getSummaryMonthly(), getExchangeRate()]);
+  const range = resolveRangeFromSearchParams(resolvedSearchParams, deriveDataBounds(monthly));
   const money = (v: number) => formatCompactCurrency(convertFromNGN(v, currency, rateInfo.rate), currency);
 
   const revenue = aggregateKpi(snapshot, "Group", "Consolidated Revenue", range.months);
@@ -72,7 +72,7 @@ export default async function GroupOverviewPage({ searchParams }: PageProps<"/">
         <Suspense>
           <div className="flex flex-wrap items-center gap-2">
             <CurrencyToggle currentCurrency={currency} rateInfo={rateInfo} lang={lang} />
-            <DateRangeFilter currentPreset={range.preset} from={resolvedSearchParams.from as string | undefined} to={resolvedSearchParams.to as string | undefined} />
+            <DateRangeFilter currentPreset={range.preset} from={resolvedSearchParams.from as string | undefined} to={resolvedSearchParams.to as string | undefined} bounds={range.bounds} />
           </div>
         </Suspense>
       </div>
