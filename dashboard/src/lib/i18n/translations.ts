@@ -11,6 +11,7 @@ export const translations = {
       bakery: "Bakery",
       workforce: "Workforce",
       dataEntry: "Data Entry",
+      guide: "Guide",
       exportPdf: "Export PDF",
       backToGroupOverview: "Group Overview",
     },
@@ -134,6 +135,10 @@ export const translations = {
       setupGuideLinkText: "Setup guide",
       setupGuideHint: "Once this form exists, add its link here.",
     },
+    guide: {
+      pageTitle: "Understanding Your Dashboard",
+      pageSubtitle: "A plain-language walkthrough of every number, chart, and table on this dashboard — for readers who want to understand what they're looking at, not build it.",
+    },
   },
   ar: {
     nav: {
@@ -145,6 +150,7 @@ export const translations = {
       bakery: "المخبز",
       workforce: "القوى العاملة",
       dataEntry: "إدخال البيانات",
+      guide: "الدليل",
       exportPdf: "تصدير PDF",
       backToGroupOverview: "نظرة عامة على المجموعة",
     },
@@ -267,6 +273,10 @@ export const translations = {
       notSetUp: "لم يتم الإعداد بعد",
       setupGuideLinkText: "دليل الإعداد",
       setupGuideHint: "بمجرد إنشاء هذا النموذج، أضف رابطه هنا.",
+    },
+    guide: {
+      pageTitle: "دليل قراءة لوحة البيانات",
+      pageSubtitle: "شرح مبسّط لكل رقم ورسم بياني وجدول في هذه اللوحة — لمن يريد أن يفهم ما يراه، لا أن يبنيه. (المحتوى التفصيلي متوفر بالإنجليزية حاليًا.)",
     },
   },
 } as const;

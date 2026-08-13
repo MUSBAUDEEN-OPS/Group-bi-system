@@ -20,6 +20,7 @@ export function NavHeader() {
     { href: "/bakery", label: t.bakery },
     { href: "/workforce", label: t.workforce },
     { href: "/data-entry", label: t.dataEntry },
+    { href: "/guide", label: t.guide },
   ];
 
   return (
