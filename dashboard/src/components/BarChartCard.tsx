@@ -30,10 +30,12 @@ function BarTooltip({ active, payload, valueFormatter }: any) {
 export function BarChartCard({ title, data, color = "var(--series-hajj-umrah)", format = "number", currency = "NGN", rate = 1, layout = "vertical" }: BarChartCardProps) {
   const isHorizontal = layout === "horizontal";
   const valueFormatter = resolveFormatter(format, { currency, rate });
+  const longestLabel = data.reduce((max, d) => Math.max(max, d.label.length), 0);
+  const yAxisWidth = Math.min(200, Math.max(90, longestLabel * 7 + 20));
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+    <div className="flex flex-col rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
       <h3 className="mb-3 text-sm font-semibold text-[var(--foreground)]">{title}</h3>
-      <div dir="ltr" style={{ height: Math.max(160, data.length * 34) }} className="w-full">
+      <div dir="ltr" style={{ height: Math.max(160, data.length * 34) }} className="mt-auto w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
@@ -45,7 +47,7 @@ export function BarChartCard({ title, data, color = "var(--series-hajj-umrah)", 
             {isHorizontal ? (
               <>
                 <XAxis type="number" tickFormatter={valueFormatter} stroke="var(--baseline)" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="label" stroke="var(--baseline)" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} width={90} />
+                <YAxis type="category" dataKey="label" stroke="var(--baseline)" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} width={yAxisWidth} />
               </>
             ) : (
               <>
